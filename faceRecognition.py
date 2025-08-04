@@ -11,7 +11,7 @@ from deepface import DeepFace
 app = Flask(__name__)
 CORS(app)
 
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/voting_system'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/Face_Guard_Voting_System'
 mongo = PyMongo(app)
 
 dataset_dir = 'face_dataset'
@@ -100,7 +100,6 @@ def recognize_face():
     except:
         return jsonify({"error": "Invalid regionId format"}), 400
 
-    # Decode and save input image temporarily
     input_path = os.path.join(dataset_dir, 'temp.jpg')
     nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
