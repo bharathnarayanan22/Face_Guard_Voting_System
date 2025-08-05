@@ -1,29 +1,75 @@
+// const mongoose = require('mongoose');
+
+// const regionSchema = new mongoose.Schema({
+//   name: {
+//     type: String,
+//     required: true,
+//     unique: true,
+//   },
+//   description: {
+//     type: String,
+//     required: false,
+//   },
+//   voters: [
+//     {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'Voter', 
+//     }
+//   ],
+//   parties: [
+//     {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'Party', 
+//     }
+//   ],
+// }, { timestamps: true });
+
+// const Region = mongoose.model('Region', regionSchema);
+
+// module.exports = Region;
+
+
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 const regionSchema = new mongoose.Schema({
-  name: {
+  uuid: {
     type: String,
-    required: true,
+    default: () => uuidv4(),
     unique: true,
   },
-  description: {
+  state: {
     type: String,
-    required: false,
+    required: true,
   },
-  voters: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Voter', 
-    }
-  ],
-  parties: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Party', 
-    }
-  ],
+  district: {
+    type: String,
+    required: true,
+  },
+  zone: {
+    type: String,
+    required: true,
+  },
+  taluk: {
+    type: String,
+    required: true,
+  },
+  wardNo: {
+    type: Number,
+    required: true,
+  },
+  pincode: {
+    type: String,
+    required: true,
+  },
+  voters: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Voter'
+  }],
+  parties: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Party'
+  }]
 }, { timestamps: true });
 
-const Region = mongoose.model('Region', regionSchema);
-
-module.exports = Region;
+module.exports = mongoose.model('Region', regionSchema);
