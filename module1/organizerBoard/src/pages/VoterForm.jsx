@@ -99,7 +99,7 @@ const VoterForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box>
-        <Typography
+        {/* <Typography
           variant="h4"
           gutterBottom
           sx={{
@@ -110,7 +110,7 @@ const VoterForm = () => {
           }}
         >
           Enroll Voter
-        </Typography>
+        </Typography> */}
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField

@@ -58,7 +58,7 @@ const RegionForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box>
-        <Typography
+        {/* <Typography
           variant="h4"
           gutterBottom
           sx={{
@@ -69,7 +69,7 @@ const RegionForm = () => {
           }}
         >
           Create Region
-        </Typography>
+        </Typography> */}
         <TextField
           label="Region Name"
           variant="outlined"

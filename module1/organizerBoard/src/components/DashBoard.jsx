@@ -239,28 +239,28 @@ export default function OrganizerDashboard() {
           <StyledList>
             {[
               {
-                view: "createRegion",
+                view: "CreateRegion",
                 text: "Create Region",
                 icon: <AddLocationIcon />,
               },
               {
-                view: "enrollVoter",
+                view: "EnrollVoter",
                 text: "Enroll Voter",
                 icon: <PersonAddIcon />,
               },
               {
-                view: "enrollParty",
+                view: "EnrollParty",
                 text: "Enroll Party",
                 icon: <GroupAddIcon />,
               },
-              { view: "viewRegions", text: "View Regions", icon: <MapIcon /> },
+              { view: "ViewRegions", text: "View Regions", icon: <MapIcon /> },
               {
-                view: "viewVoters",
+                view: "ViewVoters",
                 text: "View Voters",
                 icon: <PeopleAltIcon />,
               },
               {
-                view: "viewParties",
+                view: "ViewParties",
                 text: "View Parties",
                 icon: <GroupsIcon />,
               },
@@ -309,16 +309,16 @@ export default function OrganizerDashboard() {
                 flexWrap: "wrap",
                 justifyContent: "space-around",
                 gap: 12,
-                padding: 5,
+                padding: 4,
               }}
             >
               {[
-                { view: "createRegion", text: "Create Region", icon: p6 },
-                { view: "enrollVoter", text: "Enroll Voter", icon: p2 },
-                { view: "enrollParty", text: "Enroll Party", icon: p3 },
-                { view: "viewRegions", text: "View Regions", icon: p5 },
-                { view: "viewVoters", text: "View Voters", icon: p1 },
-                { view: "viewParties", text: "View Parties", icon: p4 },
+                { view: "CreateRegion", text: "Create Region", icon: p6 },
+                { view: "EnrollVoter", text: "Enroll Voter", icon: p2 },
+                { view: "EnrollParty", text: "Enroll Party", icon: p3 },
+                { view: "ViewRegions", text: "View Regions", icon: p5 },
+                { view: "ViewVoters", text: "View Voters", icon: p1 },
+                { view: "ViewParties", text: "View Parties", icon: p4 },
               ].map((item) => (
                 <Card
                   key={item.view}
@@ -327,9 +327,8 @@ export default function OrganizerDashboard() {
                     borderRadius: 5,
                     cursor: "pointer",
                     transition: "all 0.3s ease-in-out",
-                    boxShadow: `
-      0 4px 8px rgba(0,0,0,0.2),
-      0 0 12px rgba(255, 215, 0, 0.3)`,
+                    boxShadow:
+                      "0 4px 8px rgba(0,0,0,0.2), 0 0 12px rgba(255, 215, 0, 0.3)",
                     overflow: "hidden",
                     display: "flex",
                     flexDirection: "column",
@@ -337,9 +336,8 @@ export default function OrganizerDashboard() {
                     position: "relative",
                     "&:hover": {
                       transform: "scale(1.05)",
-                      boxShadow: `
-        0 6px 16px rgba(0,0,0,0.25),
-        0 0 24px rgba(255, 215, 0, 0.6)`,
+                      boxShadow:
+                        "0 6px 16px rgba(0,0,0,0.25), 0 0 24px rgba(255, 215, 0, 0.6)",
                       "& .topSection": {
                         backgroundColor: "#FF9933",
                         "&::before": {
@@ -350,11 +348,11 @@ export default function OrganizerDashboard() {
                           width: "200%",
                           height: "200%",
                           background: `linear-gradient(
-            to bottom right,
-            rgba(255,255,255,0) 0%,
-            rgba(255,255,255,0.8) 50%,
-            rgba(255,255,255,0) 100%
-          )`,
+                            to bottom right,
+                            rgba(255,255,255,0) 0%,
+                            rgba(255,255,255,0.8) 50%,
+                            rgba(255,255,255,0) 100%
+                          )`,
                           transform: "rotate(30deg)",
                           animation: "glitter 3s infinite linear",
                         },
@@ -363,7 +361,6 @@ export default function OrganizerDashboard() {
                   }}
                   onClick={() => handleCardClick(item.view)}
                 >
-                  {/* Top Section - Image with Glitter */}
                   <Box
                     className="topSection"
                     sx={{
@@ -396,8 +393,6 @@ export default function OrganizerDashboard() {
                       alt={item.text}
                     />
                   </Box>
-
-                  {/* Bottom Section - Text */}
                   <Box
                     sx={{
                       backgroundColor: "white",
@@ -405,7 +400,6 @@ export default function OrganizerDashboard() {
                       textAlign: "center",
                       borderTop: "2px solid #138808",
                       transition: "all 0.3s ease-in-out",
-                      "&:hover": {},
                     }}
                   >
                     <Typography
@@ -435,17 +429,79 @@ export default function OrganizerDashboard() {
             <Box
               sx={{
                 maxWidth: "800px",
-                width: { xs: "90%", sm: "80%", md: "70%" },
+                width: { xs: "95%", sm: "85%", md: "75%" },
                 mx: "auto",
                 mt: 2,
+                overflow: "hidden",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                borderRadius: 2,
+                position: "relative",
+                // Gradient border using pseudo-elements
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: 2,
+                  padding: "3px", // Border width
+                  background:
+                    "linear-gradient(90deg, #FF9933 0%, #FFFFFF 50%, #138808 100%)",
+                  WebkitMask:
+                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+                  WebkitMaskComposite: "xor",
+                  maskComposite: "exclude",
+                  pointerEvents: "none",
+                },
               }}
             >
-              {selectedView === "createRegion" && <RegionForm />}
-              {selectedView === "enrollVoter" && <EnrollVoterForm />}
-              {selectedView === "enrollParty" && <EnrollPartyForm />}
-              {selectedView === "viewRegions" && <ViewRegions />}
-              {selectedView === "viewVoters" && <ViewVoterPage />}
-              {selectedView === "viewParties" && <ViewPartyPage />}
+              {/* Title Section - Orange Background */}
+              <Box
+                sx={{
+                  bgcolor: "#FF9933",
+                  color: "white",
+                  p: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderBottom: "2px solid #138808",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 600,
+                    fontFamily: '"Dancing Script", cursive',
+                    fontStyle: "italic",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {selectedView.replace(/([A-Z])/g, " $1").trim()}
+                </Typography>
+                <IconButton
+                  onClick={() => setSelectedView(null)}
+                  sx={{ color: "white" }}
+                >
+                  <ChevronLeftIcon />
+                </IconButton>
+              </Box>
+
+              {/* Content Section - White Background */}
+              <Box
+                sx={{
+                  bgcolor: "white",
+                  p: 3,
+                  minHeight: "300px",
+                }}
+              >
+                {selectedView === "CreateRegion" && <RegionForm />}
+                {selectedView === "EnrollVoter" && <EnrollVoterForm />}
+                {selectedView === "EnrollParty" && <EnrollPartyForm />}
+                {selectedView === "ViewRegions" && <ViewRegions />}
+                {selectedView === "ViewVoters" && <ViewVoterPage />}
+                {selectedView === "ViewParties" && <ViewPartyPage />}
+              </Box>
             </Box>
           )}
         </Main>

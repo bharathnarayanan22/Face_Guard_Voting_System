@@ -143,14 +143,14 @@ const ViewParties= () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{
+      {/* <Typography variant="h4" gutterBottom sx={{
           fontFamily: "Playfair Display",
           fontStyle: "italic",
           fontWeight: 900,
           color: "#121481",
         }}>
         Parties Registered
-      </Typography>
+      </Typography> */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <TextField
           label="Search by Party Name"

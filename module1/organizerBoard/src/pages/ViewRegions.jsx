@@ -167,7 +167,7 @@ const ViewRegions = () => {
 
   return (
     <Box>
-      <Typography
+      {/* <Typography
         variant="h4"
         gutterBottom
         sx={{
@@ -178,7 +178,7 @@ const ViewRegions = () => {
         }}
       >
         Regions Registered
-      </Typography>
+      </Typography> */}
    <TableContainer component={Paper}>
         <Table sx={{ width: "100%" }}>
           <TableHead>

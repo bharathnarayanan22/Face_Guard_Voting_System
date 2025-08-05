@@ -89,7 +89,7 @@ const PartyForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box>
-        <Typography
+        {/* <Typography
           variant="h4"
           gutterBottom
           sx={{
@@ -100,7 +100,7 @@ const PartyForm = () => {
           }}
         >
           Enroll Party
-        </Typography>
+        </Typography> */}
         <TextField
           label="Party Name"
           variant="outlined"

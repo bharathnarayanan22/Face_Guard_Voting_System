@@ -129,14 +129,14 @@ const ViewVoters = () => {
       pdf.addImage(imgData, "PNG", 0, 0);
       pdf.save(`${selectedVoter.label}_profile.pdf`);
       if (downloadButtonRef.current) {
-        downloadButtonRef.current.style.display = "inline"; // Show the button again
+        downloadButtonRef.current.style.display = "inline"; 
       }
     });
   };
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography
+      {/* <Typography
         variant="h4"
         gutterBottom
         sx={{
@@ -147,7 +147,7 @@ const ViewVoters = () => {
         }}
       >
         Voters Registered
-      </Typography>
+      </Typography> */}
       <Box
         display="flex"
         justifyContent="space-between"
