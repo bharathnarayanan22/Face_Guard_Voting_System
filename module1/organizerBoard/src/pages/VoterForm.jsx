@@ -25,8 +25,9 @@ const theme = createTheme({
 
 const VoterForm = () => {
   const webcamRef = useRef(null);
+  const [title, setTitle] = useState("");
   const [name, setName] = useState("");
-  const [mobile_number, setmobile_number] = useState("");
+  const [mobile_number, setMobileNumber] = useState("");
   const [gender, setGender] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [spouseName, setSpouseName] = useState("");
@@ -35,7 +36,7 @@ const VoterForm = () => {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [regions, setRegions] = useState([]); 
+  const [regions, setRegions] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState("");
 
   useEffect(() => {
@@ -65,7 +66,9 @@ const VoterForm = () => {
     const capturedPhotos = [];
     for (let i = 0; i < 20; i++) {
       const imageSrc = webcamRef.current.getScreenshot();
-      capturedPhotos.push(imageSrc);
+      if (imageSrc) {
+        capturedPhotos.push(imageSrc);
+      }
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     setPhotos(capturedPhotos);
@@ -74,8 +77,8 @@ const VoterForm = () => {
   const handleEnroll = async () => {
     try {
       setLoading(true);
-      console.log(maritalStatus)
-      const response = await axios.post("http://127.0.0.1:5000/capture", {
+      const payload = {
+        title,
         name,
         mobile_number,
         gender,
@@ -86,11 +89,15 @@ const VoterForm = () => {
         dateOfBirth,
         regionId: selectedRegion ? selectedRegion.value : null,
         image: photos.map((photo) => photo.split(",")[1]),
-      });
-
+      };
+      const response = await axios.post(
+        "http://127.0.0.1:5000/capture",
+        payload
+      );
       alert("Voter enrolled successfully!");
     } catch (error) {
       console.error("Error enrolling voter:", error);
+      alert("Failed to enroll voter. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -99,19 +106,32 @@ const VoterForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box>
-        {/* <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            fontFamily: "Playfair Display",
-            fontStyle: "italic",
-            fontWeight: 900,
-            color: "#121481",
-          }}
-        >
-          Enroll Voter
-        </Typography> */}
         <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={2}>
+            <TextField
+              select
+              label="Title"
+              variant="outlined"
+              fullWidth
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: 56, 
+                },
+                "& .MuiSelect-select": {
+                  padding: "12px 14px", 
+                },
+                width: 90, 
+              }}
+            >
+              <MenuItem value="Mr">Mr</MenuItem>
+              <MenuItem value="Ms">Ms</MenuItem>
+              <MenuItem value="Mrs">Mrs</MenuItem>
+              <MenuItem value="Dr">Dr</MenuItem>
+            </TextField>
+          </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               label="Name"
@@ -128,7 +148,7 @@ const VoterForm = () => {
               variant="outlined"
               fullWidth
               value={mobile_number}
-              onChange={(e) => setmobile_number(e.target.value)}
+              onChange={(e) => setMobileNumber(e.target.value)}
               required
               inputProps={{ pattern: "[0-9]*" }}
             />
@@ -141,9 +161,7 @@ const VoterForm = () => {
               type="date"
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
               required
             />
           </Grid>
@@ -156,6 +174,15 @@ const VoterForm = () => {
               value={gender}
               onChange={(e) => setGender(e.target.value)}
               required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: 56, 
+                },
+                "& .MuiSelect-select": {
+                  padding: "12px 14px", 
+                },
+                width: 120, 
+              }}
             >
               <MenuItem value="male">Male</MenuItem>
               <MenuItem value="female">Female</MenuItem>
@@ -171,47 +198,59 @@ const VoterForm = () => {
               value={maritalStatus}
               onChange={(e) => setMaritalStatus(e.target.value)}
               required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  height: 56, 
+                },
+                "& .MuiSelect-select": {
+                  padding: "12px 14px", 
+                },
+                width: 160, 
+              }}
             >
               <MenuItem value="married">Married</MenuItem>
               <MenuItem value="unmarried">Unmarried</MenuItem>
             </TextField>
           </Grid>
-          {maritalStatus === "married" && (
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label={gender === "male" ? "Wife's Name" : "Husband's Name"}
-                variant="outlined"
-                fullWidth
-                value={spouseName}
-                onChange={(e) => setSpouseName(e.target.value)}
-                required
-              />
-            </Grid>
-          )}
-          {maritalStatus === "unmarried" && (
-            <>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Father's Name"
-                  variant="outlined"
-                  fullWidth
-                  value={fatherName}
-                  onChange={(e) => setFatherName(e.target.value)}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Mother's Name"
-                  variant="outlined"
-                  fullWidth
-                  value={motherName}
-                  onChange={(e) => setMotherName(e.target.value)}
-                  required
-                />
-              </Grid>
-            </>
-          )}
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label={
+                gender === "male"
+                  ? "Wife's Name"
+                  : gender === "female"
+                  ? "Husband's Name"
+                  : "Spouse's Name"
+              }
+              variant="outlined"
+              fullWidth
+              value={spouseName}
+              onChange={(e) => setSpouseName(e.target.value)}
+              disabled={maritalStatus !== "married"}
+              required={maritalStatus === "married"}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Father's Name"
+              variant="outlined"
+              fullWidth
+              value={fatherName}
+              onChange={(e) => setFatherName(e.target.value)}
+              disabled={maritalStatus !== "unmarried"}
+              required={maritalStatus === "unmarried"}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Mother's Name"
+              variant="outlined"
+              fullWidth
+              value={motherName}
+              onChange={(e) => setMotherName(e.target.value)}
+              disabled={maritalStatus !== "unmarried"}
+              required={maritalStatus === "unmarried"}
+            />
+          </Grid>
           <Grid item xs={12} sm={6}>
             <Select
               options={regions}
