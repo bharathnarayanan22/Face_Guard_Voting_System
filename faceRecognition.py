@@ -118,8 +118,8 @@ def recognize_face():
                     img1_path=input_path,
                     img2_path=saved_path,
                     model_name='ArcFace',
-                    detector_backend='retinaface',
-                    enforce_detection=True
+                    # detector_backend='retinaface',
+                    # enforce_detection=True
                 )
                 if result['verified'] and result['distance'] < min_distance:
                     min_distance = result['distance']
