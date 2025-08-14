@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Typography,
@@ -336,241 +335,378 @@ const ViewRegions = () => {
         >
           Search Regions
         </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="State"
-              variant="outlined"
-              fullWidth
-              value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value)}
-              required
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select State
-              </MenuItem>
-              {states.map((state) => (
-                <MenuItem key={state.value} value={state.value}>
-                  {state.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="District"
-              variant="outlined"
-              fullWidth
-              value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.target.value)}
-              required
-              disabled={!selectedState}
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select District
-              </MenuItem>
-              {districts.map((district) => (
-                <MenuItem key={district.value} value={district.value}>
-                  {district.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="Zone"
-              variant="outlined"
-              fullWidth
-              value={selectedZone}
-              onChange={(e) => setSelectedZone(e.target.value)}
-              required
-              disabled={!selectedDistrict}
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select Zone
-              </MenuItem>
-              {zones.map((zone) => (
-                <MenuItem key={zone.value} value={zone.value}>
-                  {zone.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="Taluk"
-              variant="outlined"
-              fullWidth
-              value={selectedTaluk}
-              onChange={(e) => setSelectedTaluk(e.target.value)}
-              required
-              disabled={!selectedZone}
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select Taluk
-              </MenuItem>
-              {taluks.map((taluk) => (
-                <MenuItem key={taluk.value} value={taluk.value}>
-                  {taluk.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="Ward No"
-              variant="outlined"
-              fullWidth
-              value={selectedWardNo}
-              onChange={(e) => setSelectedWardNo(e.target.value)}
-              required
-              disabled={!selectedTaluk}
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select Ward No
-              </MenuItem>
-              {wardNos.map((wardNo) => (
-                <MenuItem key={wardNo.value} value={wardNo.value}>
-                  {wardNo.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-          <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
-            <TextField
-              select
-              label="Pincode"
-              variant="outlined"
-              fullWidth
-              value={selectedPincode}
-              onChange={(e) => setSelectedPincode(e.target.value)}
-              required
-              disabled={!selectedWardNo}
-              sx={{ minWidth: "200px" }}
-              InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
-              InputLabelProps={{ sx: { fontSize: "1rem" } }}
-            >
-              <MenuItem value="" disabled>
-                Select Pincode
-              </MenuItem>
-              {pincodes.map((pincode) => (
-                <MenuItem key={pincode.value} value={pincode.value}>
-                  {pincode.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-        </Box>
+        {!filteredRegion && (
+          <>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="State"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  required
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select State
+                  </MenuItem>
+                  {states.map((state) => (
+                    <MenuItem key={state.value} value={state.value}>
+                      {state.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="District"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.target.value)}
+                  required
+                  disabled={!selectedState}
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select District
+                  </MenuItem>
+                  {districts.map((district) => (
+                    <MenuItem key={district.value} value={district.value}>
+                      {district.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="Zone"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
+                  required
+                  disabled={!selectedDistrict}
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select Zone
+                  </MenuItem>
+                  {zones.map((zone) => (
+                    <MenuItem key={zone.value} value={zone.value}>
+                      {zone.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="Taluk"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedTaluk}
+                  onChange={(e) => setSelectedTaluk(e.target.value)}
+                  required
+                  disabled={!selectedZone}
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select Taluk
+                  </MenuItem>
+                  {taluks.map((taluk) => (
+                    <MenuItem key={taluk.value} value={taluk.value}>
+                      {taluk.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="Ward No"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedWardNo}
+                  onChange={(e) => setSelectedWardNo(e.target.value)}
+                  required
+                  disabled={!selectedTaluk}
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select Ward No
+                  </MenuItem>
+                  {wardNos.map((wardNo) => (
+                    <MenuItem key={wardNo.value} value={wardNo.value}>
+                      {wardNo.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+                <TextField
+                  select
+                  label="Pincode"
+                  variant="outlined"
+                  fullWidth
+                  value={selectedPincode}
+                  onChange={(e) => setSelectedPincode(e.target.value)}
+                  required
+                  disabled={!selectedWardNo}
+                  sx={{ minWidth: "200px" }}
+                  InputProps={{ sx: { height: "48px", fontSize: "1rem" } }}
+                  InputLabelProps={{ sx: { fontSize: "1rem" } }}
+                >
+                  <MenuItem value="" disabled>
+                    Select Pincode
+                  </MenuItem>
+                  {pincodes.map((pincode) => (
+                    <MenuItem key={pincode.value} value={pincode.value}>
+                      {pincode.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+            </Box>
+            <Box mt={2}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSearch}
+                disabled={loading}
+              >
+                {loading ? "Searching..." : "Search"}
+              </Button>
+            </Box>
+          </>
+        )}
         {errorMessage && (
           <Typography variant="body1" color="error" sx={{ mt: 2 }}>
             {errorMessage}
           </Typography>
         )}
-        <Box mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? "Searching..." : "Search"}
-          </Button>
-        </Box>
 
         {filteredRegion && (
-          <TableContainer component={Paper} sx={{ mt: 4 }}>
-            <Table sx={{ width: "100%" }}>
-              <TableHead>
-                <TableRow style={{ backgroundColor: "#138808" }}>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    State
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    District
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Zone
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Taluk
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Ward No
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Pincode
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Number of Voters
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Number of Parties
-                  </TableCell>
-                  <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                    Actions
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>{filteredRegion.state}</TableCell>
-                  <TableCell>{filteredRegion.district}</TableCell>
-                  <TableCell>{filteredRegion.zone}</TableCell>
-                  <TableCell>{filteredRegion.taluk}</TableCell>
-                  <TableCell>{filteredRegion.wardNo}</TableCell>
-                  <TableCell>{filteredRegion.pincode}</TableCell>
-                  <TableCell>{filteredRegion.numberOfVoters}</TableCell>
-                  <TableCell>{filteredRegion.numberOfParties}</TableCell>
-                  <TableCell sx={{ display: "flex", gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
-                      sx={{
-                        color: "#FFFFFF",
-                        "&:hover": { backgroundColor: "#138808" },
-                      }}
-                      onClick={() => fetchVoters(filteredRegion._id)}
-                    >
-                      View Voters
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
-                      sx={{
-                        color: "#FFFFFF",
-                        "&:hover": { backgroundColor: "#138808" },
-                      }}
-                      onClick={() => fetchParties(filteredRegion._id)}
-                    >
-                      View Parties
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: "8px", mb: 4, alignItems: "center", overflowX: "auto" }}>
+              <TextField
+                select
+                label="State"
+                variant="outlined"
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                required
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  State
+                </MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={state.value} value={state.value}>
+                    {state.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="District"
+                variant="outlined"
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
+                disabled={!selectedState}
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  District
+                </MenuItem>
+                {districts.map((district) => (
+                  <MenuItem key={district.value} value={district.value}>
+                    {district.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Zone"
+                variant="outlined"
+                value={selectedZone}
+                onChange={(e) => setSelectedZone(e.target.value)}
+                disabled={!selectedDistrict}
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  Zone
+                </MenuItem>
+                {zones.map((zone) => (
+                  <MenuItem key={zone.value} value={zone.value}>
+                    {zone.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Taluk"
+                variant="outlined"
+                value={selectedTaluk}
+                onChange={(e) => setSelectedTaluk(e.target.value)}
+                disabled={!selectedZone}
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  Taluk
+                </MenuItem>
+                {taluks.map((taluk) => (
+                  <MenuItem key={taluk.value} value={taluk.value}>
+                    {taluk.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Ward No"
+                variant="outlined"
+                value={selectedWardNo}
+                onChange={(e) => setSelectedWardNo(e.target.value)}
+                disabled={!selectedTaluk}
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  Ward No
+                </MenuItem>
+                {wardNos.map((wardNo) => (
+                  <MenuItem key={wardNo.value} value={wardNo.value}>
+                    {wardNo.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select
+                label="Pincode"
+                variant="outlined"
+                value={selectedPincode}
+                onChange={(e) => setSelectedPincode(e.target.value)}
+                disabled={!selectedWardNo}
+                sx={{ width: "120px", flexShrink: 0 }}
+                InputProps={{ sx: { height: "36px", fontSize: "0.8rem" } }}
+                InputLabelProps={{ sx: { fontSize: "0.8rem" } }}
+              >
+                <MenuItem value="" disabled>
+                  Pincode
+                </MenuItem>
+                {pincodes.map((pincode) => (
+                  <MenuItem key={pincode.value} value={pincode.value}>
+                    {pincode.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSearch}
+                disabled={loading}
+                sx={{ height: "36px", fontSize: "0.8rem", flexShrink: 0 }}
+              >
+                {loading ? "Searching..." : "Search"}
+              </Button>
+            </Box>
+            <TableContainer component={Paper}>
+              <Table sx={{ width: "100%" }}>
+                <TableHead>
+                  <TableRow style={{ backgroundColor: "#138808" }}>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      State
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      District
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Zone
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Taluk
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Ward No
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Pincode
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Number of Voters
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Number of Parties
+                    </TableCell>
+                    <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      Actions
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>{filteredRegion.state}</TableCell>
+                    <TableCell>{filteredRegion.district}</TableCell>
+                    <TableCell>{filteredRegion.zone}</TableCell>
+                    <TableCell>{filteredRegion.taluk}</TableCell>
+                    <TableCell>{filteredRegion.wardNo}</TableCell>
+                    <TableCell>{filteredRegion.pincode}</TableCell>
+                    <TableCell>{filteredRegion.numberOfVoters}</TableCell>
+                    <TableCell>{filteredRegion.numberOfParties}</TableCell>
+                    <TableCell sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
+                        sx={{
+                          color: "#FFFFFF",
+                          "&:hover": { backgroundColor: "#138808" },
+                        }}
+                        onClick={() => fetchVoters(filteredRegion._id)}
+                      >
+                        View Voters
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
+                        sx={{
+                          color: "#FFFFFF",
+                          "&:hover": { backgroundColor: "#138808" },
+                        }}
+                        onClick={() => fetchParties(filteredRegion._id)}
+                      >
+                        View Parties
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </>
         )}
 
         {/* Voters Dialog */}
@@ -712,6 +848,3 @@ const ViewRegions = () => {
 };
 
 export default ViewRegions;
-
-
-

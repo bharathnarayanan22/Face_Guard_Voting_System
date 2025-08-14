@@ -428,15 +428,30 @@ export default function OrganizerDashboard() {
           {selectedView && (
             <Box
               sx={{
-                maxWidth: "800px",
-                width: { xs: "95%", sm: "85%", md: "75%" },
+                maxWidth:
+                  selectedView === "ViewRegions" ||
+                  selectedView === "ViewVoters" ||
+                  selectedView === "ViewParties"
+                    ? "none" 
+                    : "800px",
+                width:
+                  selectedView === "ViewRegions" ||
+                  selectedView === "ViewVoters" ||
+                  selectedView === "ViewParties"
+                    ? "90vw" 
+                    : "auto",
+                minHeight:
+                  selectedView === "ViewRegions" ||
+                  selectedView === "ViewVoters" ||
+                  selectedView === "ViewParties"
+                    ? "500px"
+                    : "300px",
                 mx: "auto",
                 mt: 2,
-                overflow: "hidden",
+                overflow: "auto", // Changed from "hidden" to "auto" for scrollable content
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
                 borderRadius: 2,
                 position: "relative",
-                // Gradient border using pseudo-elements
                 "&::before": {
                   content: '""',
                   position: "absolute",
@@ -445,7 +460,7 @@ export default function OrganizerDashboard() {
                   right: 0,
                   bottom: 0,
                   borderRadius: 2,
-                  padding: "3px", // Border width
+                  padding: "3px",
                   background:
                     "linear-gradient(90deg, #FF9933 0%, #FFFFFF 50%, #138808 100%)",
                   WebkitMask:
@@ -493,6 +508,7 @@ export default function OrganizerDashboard() {
                   bgcolor: "white",
                   p: 3,
                   minHeight: "300px",
+                  width: "100%", // Ensure content takes full width
                 }}
               >
                 {selectedView === "CreateRegion" && <RegionForm />}
