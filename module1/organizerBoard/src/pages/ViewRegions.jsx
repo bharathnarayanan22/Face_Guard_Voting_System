@@ -39,12 +39,12 @@ const ViewRegions = () => {
   const [taluks, setTaluks] = useState([]);
   const [wardNos, setWardNos] = useState([]);
   const [pincodes, setPincodes] = useState([]);
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedZone, setSelectedZone] = useState("");
-  const [selectedTaluk, setSelectedTaluk] = useState("");
-  const [selectedWardNo, setSelectedWardNo] = useState("");
-  const [selectedPincode, setSelectedPincode] = useState("");
+  const [selectedState, setSelectedState] = useState("All");
+  const [selectedDistrict, setSelectedDistrict] = useState("All");
+  const [selectedZone, setSelectedZone] = useState("All");
+  const [selectedTaluk, setSelectedTaluk] = useState("All");
+  const [selectedWardNo, setSelectedWardNo] = useState("All");
+  const [selectedPincode, setSelectedPincode] = useState("All");
   const [filteredRegion, setFilteredRegion] = useState(null);
   const [voters, setVoters] = useState([]);
   const [parties, setParties] = useState([]);
@@ -61,10 +61,11 @@ const ViewRegions = () => {
           const data = await response.json();
           setRegions(data.regions);
           const uniqueStates = [
-            ...new Set(data.regions.map((region) => region.state)),
-          ]
-            .sort()
-            .map((state) => ({ value: state, label: state }));
+            { value: "All", label: "All States" },
+            ...[...new Set(data.regions.map((region) => region.state))]
+              .sort()
+              .map((state) => ({ value: state, label: state })),
+          ];
           setStates(uniqueStates);
         } else {
           setErrorMessage("Failed to fetch regions. Please try again.");
@@ -78,205 +79,152 @@ const ViewRegions = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedState) {
-      const filteredDistricts = [
-        ...new Set(
-          regions
-            .filter((region) => region.state === selectedState)
-            .map((region) => region.district)
-        ),
-      ]
-        .sort()
-        .map((district) => ({ value: district, label: district }));
-      setDistricts(filteredDistricts);
-      setSelectedDistrict("");
-      setZones([]);
-      setTaluks([]);
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedZone("");
-      setSelectedTaluk("");
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    } else {
-      setDistricts([]);
-      setZones([]);
-      setTaluks([]);
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedDistrict("");
-      setSelectedZone("");
-      setSelectedTaluk("");
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    }
-  }, [selectedState, regions]);
-
-  useEffect(() => {
-    if (selectedDistrict) {
-      const filteredZones = [
+    const filteredDistricts = [
+      { value: "All", label: "All Districts" },
+      ...[
         ...new Set(
           regions
             .filter(
               (region) =>
-                region.state === selectedState &&
-                region.district === selectedDistrict
+                selectedState === "All" || region.state === selectedState
+            )
+            .map((region) => region.district)
+        ),
+      ]
+        .sort()
+        .map((district) => ({ value: district, label: district })),
+    ];
+    setDistricts(filteredDistricts);
+  }, [selectedState, regions]);
+
+  useEffect(() => {
+    const filteredZones = [
+      { value: "All", label: "All Zones" },
+      ...[
+        ...new Set(
+          regions
+            .filter(
+              (region) =>
+                (selectedState === "All" || region.state === selectedState) &&
+                (selectedDistrict === "All" ||
+                  region.district === selectedDistrict)
             )
             .map((region) => region.zone)
         ),
       ]
         .sort()
-        .map((zone) => ({ value: zone, label: zone }));
-      setZones(filteredZones);
-      setSelectedZone("");
-      setTaluks([]);
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedTaluk("");
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    } else {
-      setZones([]);
-      setTaluks([]);
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedZone("");
-      setSelectedTaluk("");
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    }
+        .map((zone) => ({ value: zone, label: zone })),
+    ];
+    setZones(filteredZones);
   }, [selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
-    if (selectedZone) {
-      const filteredTaluks = [
+    const filteredTaluks = [
+      { value: "All", label: "All Taluks" },
+      ...[
         ...new Set(
           regions
             .filter(
               (region) =>
-                region.state === selectedState &&
-                region.district === selectedDistrict &&
-                region.zone === selectedZone
+                (selectedState === "All" || region.state === selectedState) &&
+                (selectedDistrict === "All" ||
+                  region.district === selectedDistrict) &&
+                (selectedZone === "All" || region.zone === selectedZone)
             )
             .map((region) => region.taluk)
         ),
       ]
         .sort()
-        .map((taluk) => ({ value: taluk, label: taluk }));
-      setTaluks(filteredTaluks);
-      setSelectedTaluk("");
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    } else {
-      setTaluks([]);
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedTaluk("");
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    }
+        .map((taluk) => ({ value: taluk, label: taluk })),
+    ];
+    setTaluks(filteredTaluks);
   }, [selectedZone, selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
-    if (selectedTaluk) {
-      const filteredWardNos = [
+    const filteredWardNos = [
+      { value: "All", label: "All Wards" },
+      ...[
         ...new Set(
           regions
             .filter(
               (region) =>
-                region.state === selectedState &&
-                region.district === selectedDistrict &&
-                region.zone === selectedZone &&
-                region.taluk === selectedTaluk
+                (selectedState === "All" || region.state === selectedState) &&
+                (selectedDistrict === "All" ||
+                  region.district === selectedDistrict) &&
+                (selectedZone === "All" || region.zone === selectedZone) &&
+                (selectedTaluk === "All" || region.taluk === selectedTaluk)
             )
             .map((region) => region.wardNo)
         ),
       ]
         .sort((a, b) => a - b)
-        .map((wardNo) => ({ value: wardNo, label: wardNo }));
-      setWardNos(filteredWardNos);
-      setSelectedWardNo("");
-      setPincodes([]);
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    } else {
-      setWardNos([]);
-      setPincodes([]);
-      setSelectedWardNo("");
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    }
+        .map((wardNo) => ({ value: wardNo, label: wardNo })),
+    ];
+    setWardNos(filteredWardNos);
   }, [selectedTaluk, selectedZone, selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
-    if (selectedWardNo) {
-      const filteredPincodes = [
+    const filteredPincodes = [
+      { value: "All", label: "All Pincodes" },
+      ...[
         ...new Set(
           regions
             .filter(
               (region) =>
-                region.state === selectedState &&
-                region.district === selectedDistrict &&
-                region.zone === selectedZone &&
-                region.taluk === selectedTaluk &&
-                region.wardNo === selectedWardNo
+                (selectedState === "All" || region.state === selectedState) &&
+                (selectedDistrict === "All" ||
+                  region.district === selectedDistrict) &&
+                (selectedZone === "All" || region.zone === selectedZone) &&
+                (selectedTaluk === "All" || region.taluk === selectedTaluk) &&
+                (selectedWardNo === "All" || region.wardNo === selectedWardNo)
             )
             .map((region) => region.pincode)
         ),
       ]
         .sort()
-        .map((pincode) => ({ value: pincode, label: pincode }));
-      setPincodes(filteredPincodes);
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    } else {
-      setPincodes([]);
-      setSelectedPincode("");
-      setFilteredRegion(null);
-    }
-  }, [selectedWardNo, selectedTaluk, selectedZone, selectedDistrict, selectedState, regions]);
+        .map((pincode) => ({ value: pincode, label: pincode })),
+    ];
+    setPincodes(filteredPincodes);
+  }, [
+    selectedWardNo,
+    selectedTaluk,
+    selectedZone,
+    selectedDistrict,
+    selectedState,
+    regions,
+  ]);
 
   const handleSearch = async () => {
-    if (!selectedPincode) {
-      setErrorMessage("Please select all location fields.");
-      return;
-    }
-
     try {
       setLoading(true);
-      const selectedRegion = regions.find(
+      const filtered = regions.filter(
         (region) =>
-          region.state === selectedState &&
-          region.district === selectedDistrict &&
-          region.zone === selectedZone &&
-          region.taluk === selectedTaluk &&
-          region.wardNo === selectedWardNo &&
-          region.pincode === selectedPincode
+          (selectedState === "All" || region.state === selectedState) &&
+          (selectedDistrict === "All" ||
+            region.district === selectedDistrict) &&
+          (selectedZone === "All" || region.zone === selectedZone) &&
+          (selectedTaluk === "All" || region.taluk === selectedTaluk) &&
+          (selectedWardNo === "All" || region.wardNo === selectedWardNo) &&
+          (selectedPincode === "All" || region.pincode === selectedPincode)
       );
 
-      if (!selectedRegion) {
-        setErrorMessage("Selected region not found.");
-        setFilteredRegion(null);
+      if (filtered.length === 0) {
+        setErrorMessage("No regions found for the selected criteria.");
+        setFilteredRegion([]);
         return;
       }
 
-      setFilteredRegion({
-        ...selectedRegion,
-        numberOfVoters: selectedRegion.voters ? selectedRegion.voters.length : 0,
-        numberOfParties: selectedRegion.parties ? selectedRegion.parties.length : 0,
-      });
+      setFilteredRegion(
+        filtered.map((region) => ({
+          ...region,
+          numberOfVoters: region.voters ? region.voters.length : 0,
+          numberOfParties: region.parties ? region.parties.length : 0,
+        }))
+      );
       setErrorMessage("");
     } catch (error) {
       setErrorMessage("Error fetching region data. Please try again.");
-      setFilteredRegion(null);
+      setFilteredRegion([]);
     } finally {
       setLoading(false);
     }
@@ -284,7 +232,9 @@ const ViewRegions = () => {
 
   const fetchVoters = async (regionId) => {
     try {
-      const response = await fetch(`http://localhost:3000/regions/${regionId}/voters`);
+      const response = await fetch(
+        `http://localhost:3000/regions/${regionId}/voters`
+      );
       if (response.ok) {
         const data = await response.json();
         setVoters(data);
@@ -299,7 +249,9 @@ const ViewRegions = () => {
 
   const fetchParties = async (regionId) => {
     try {
-      const response = await fetch(`http://localhost:3000/regions/${regionId}/parties`);
+      const response = await fetch(
+        `http://localhost:3000/regions/${regionId}/parties`
+      );
       if (response.ok) {
         const data = await response.json();
         setParties(data);
@@ -323,22 +275,27 @@ const ViewRegions = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ padding: "16px" }}>
-        <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            fontFamily: "Playfair Display",
-            fontStyle: "italic",
-            fontWeight: 900,
-            color: "#121481",
-          }}
-        >
-          Search Regions
-        </Typography>
         {!filteredRegion && (
           <>
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{
+                fontFamily: "Playfair Display",
+                fontStyle: "italic",
+                fontWeight: 900,
+                color: "#121481",
+              }}
+            >
+              Search Regions
+            </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="State"
@@ -361,7 +318,12 @@ const ViewRegions = () => {
                   ))}
                 </TextField>
               </Box>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="District"
@@ -385,7 +347,12 @@ const ViewRegions = () => {
                   ))}
                 </TextField>
               </Box>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="Zone"
@@ -409,7 +376,12 @@ const ViewRegions = () => {
                   ))}
                 </TextField>
               </Box>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="Taluk"
@@ -433,7 +405,12 @@ const ViewRegions = () => {
                   ))}
                 </TextField>
               </Box>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="Ward No"
@@ -457,7 +434,12 @@ const ViewRegions = () => {
                   ))}
                 </TextField>
               </Box>
-              <Box sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" }, minWidth: "200px" }}>
+              <Box
+                sx={{
+                  width: { xs: "100%", sm: "calc(50% - 8px)" },
+                  minWidth: "200px",
+                }}
+              >
                 <TextField
                   select
                   label="Pincode"
@@ -502,7 +484,16 @@ const ViewRegions = () => {
 
         {filteredRegion && (
           <>
-            <Box sx={{ display: "flex", flexDirection: "row", gap: "8px", mb: 4, alignItems: "center", overflowX: "auto" }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                gap: "1%",
+                mb: 4,
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
               <TextField
                 select
                 label="State"
@@ -628,7 +619,7 @@ const ViewRegions = () => {
                 color="primary"
                 onClick={handleSearch}
                 disabled={loading}
-                sx={{ height: "36px", fontSize: "0.8rem", flexShrink: 0 }}
+                sx={{ height: "36px", fontSize: "0.8rem", flexShrink: 0, color: '#fff' }}
               >
                 {loading ? "Searching..." : "Search"}
               </Button>
@@ -666,44 +657,30 @@ const ViewRegions = () => {
                     </TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>{filteredRegion.state}</TableCell>
-                    <TableCell>{filteredRegion.district}</TableCell>
-                    <TableCell>{filteredRegion.zone}</TableCell>
-                    <TableCell>{filteredRegion.taluk}</TableCell>
-                    <TableCell>{filteredRegion.wardNo}</TableCell>
-                    <TableCell>{filteredRegion.pincode}</TableCell>
-                    <TableCell>{filteredRegion.numberOfVoters}</TableCell>
-                    <TableCell>{filteredRegion.numberOfParties}</TableCell>
-                    <TableCell sx={{ display: "flex", gap: 1 }}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
-                        sx={{
-                          color: "#FFFFFF",
-                          "&:hover": { backgroundColor: "#138808" },
-                        }}
-                        onClick={() => fetchVoters(filteredRegion._id)}
-                      >
-                        View Voters
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<DownloadIcon style={{ color: "#FFFFFF" }} />}
-                        sx={{
-                          color: "#FFFFFF",
-                          "&:hover": { backgroundColor: "#138808" },
-                        }}
-                        onClick={() => fetchParties(filteredRegion._id)}
-                      >
-                        View Parties
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
+                {Array.isArray(filteredRegion) && (
+                  <TableBody>
+                    {filteredRegion.map((region) => (
+                      <TableRow key={region._id}>
+                        <TableCell>{region.state}</TableCell>
+                        <TableCell>{region.district}</TableCell>
+                        <TableCell>{region.zone}</TableCell>
+                        <TableCell>{region.taluk}</TableCell>
+                        <TableCell>{region.wardNo}</TableCell>
+                        <TableCell>{region.pincode}</TableCell>
+                        <TableCell>{region.numberOfVoters}</TableCell>
+                        <TableCell>{region.numberOfParties}</TableCell>
+                        <TableCell sx={{ display: "flex", gap: 1 }}>
+                          <Button onClick={() => fetchVoters(region._id)}>
+                            View Voters
+                          </Button>
+                          <Button onClick={() => fetchParties(region._id)}>
+                            View Parties
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                )}
               </Table>
             </TableContainer>
           </>
@@ -736,10 +713,14 @@ const ViewRegions = () => {
                 <Table>
                   <TableHead>
                     <TableRow style={{ backgroundColor: "#ff9933" }}>
-                      <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      <TableCell
+                        style={{ color: "#FFFFFF", fontWeight: "bold" }}
+                      >
                         Name
                       </TableCell>
-                      <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      <TableCell
+                        style={{ color: "#FFFFFF", fontWeight: "bold" }}
+                      >
                         Mobile Number
                       </TableCell>
                     </TableRow>
@@ -747,7 +728,7 @@ const ViewRegions = () => {
                   <TableBody>
                     {voters.map((voter) => (
                       <TableRow key={voter._id}>
-                        <TableCell>{voter.name}</TableCell>
+                        <TableCell>{voter.label}</TableCell>
                         <TableCell>{voter.mobile_number}</TableCell>
                       </TableRow>
                     ))}
@@ -801,13 +782,19 @@ const ViewRegions = () => {
                 <Table>
                   <TableHead>
                     <TableRow style={{ backgroundColor: "#ff9933" }}>
-                      <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      <TableCell
+                        style={{ color: "#FFFFFF", fontWeight: "bold" }}
+                      >
                         Party Name
                       </TableCell>
-                      <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      <TableCell
+                        style={{ color: "#FFFFFF", fontWeight: "bold" }}
+                      >
                         Party Leader
                       </TableCell>
-                      <TableCell style={{ color: "#FFFFFF", fontWeight: "bold" }}>
+                      <TableCell
+                        style={{ color: "#FFFFFF", fontWeight: "bold" }}
+                      >
                         Party Symbol
                       </TableCell>
                     </TableRow>

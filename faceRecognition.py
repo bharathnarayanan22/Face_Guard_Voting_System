@@ -57,7 +57,7 @@ def capture_face():
         file_path = os.path.join(label_dir, f'{count}.jpg')
         cv2.imwrite(file_path, img)
 
-        result = mongo.db.faces.update_one(
+        result = mongo.db.voters.update_one(
             {'label': name},
             {
                 '$setOnInsert': {
@@ -110,7 +110,7 @@ def recognize_face():
     best_match = None
     min_distance = float('inf')
 
-    users = list(mongo.db.faces.find())
+    users = list(mongo.db.voters.find())
     for user in users:
         for saved_path in user['imagePaths']:
             try:
