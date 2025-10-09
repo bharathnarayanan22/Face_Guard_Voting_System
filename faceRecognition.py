@@ -7,6 +7,8 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from bson import ObjectId
 from deepface import DeepFace
+import random
+import vonage
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +19,75 @@ mongo = PyMongo(app)
 dataset_dir = 'face_dataset'
 os.makedirs(dataset_dir, exist_ok=True)
 
+otp_storage = {}
+
+def generate_otp(length=6):
+    """Generate a random OTP of specified length."""
+    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+
+def send_otp(mobile_number, otp):
+    """Send OTP to a mobile number using Nexmo (Vonage API)."""
+    client = vonage.Client(key="e1b9f4de", secret="UPGbSk8CLnssResQ")
+    sms = vonage.Sms(client)
+    
+    responseData = sms.send_message({
+        "from": "Vonage APIs",
+        "to": mobile_number,
+        'text': f'Your OTP is {otp}',
+    })
+
+    if responseData["messages"][0]["status"] == "0":
+        print(f"Message sent successfully to {mobile_number}.")
+    else:
+        print(f"Message failed with error: {responseData['messages'][0]['error-text']}")
+
+def verify_otp(mobile_number, entered_otp):
+    if mobile_number in otp_storage and otp_storage[mobile_number] == entered_otp:
+        print("OTP verification successful!")
+        del otp_storage[mobile_number]
+        return True
+    else:
+        print("OTP verification failed!")
+        return False
+
+@app.route('/verify-otp', methods=['POST'])
+def verify_otp_route():
+    data = request.get_json()
+    print("=== RAW DATA RECEIVED FOR OTP VERIFICATION ===")
+    print(data)
+    print("=============================================")
+    mobile_number = data.get('mobileNumber')
+    entered_otp = data.get('otp')
+    print("Verifying OTP for mobile number:", mobile_number)
+    print("Entered OTP:", entered_otp)
+
+    if not mobile_number or not entered_otp:
+        print("Mobile number or OTP missing in request")
+        return jsonify({"error": "Mobile number and OTP are required"}), 400
+
+    # ✅ Verify OTP
+    if verify_otp(mobile_number, entered_otp):
+        # ✅ Retrieve voter info
+        best_match = otp_storage.pop(f"{mobile_number}_voter", None)
+        if not best_match:
+            print("Voter session expired or not found")
+            return jsonify({"error": "Voter session expired"}), 400
+
+        # ✅ Mark the voter as voted
+        mongo.db.voters.update_one(
+            {"label": best_match['label']},
+            {"$set": {"hasVoted": True}}
+        )
+
+        return jsonify({
+            "success": True,
+            "message": "OTP verified successfully. Vote recorded.",
+            "name": best_match['label']
+        }), 200
+
+    return jsonify({"success": False, "message": "Invalid OTP"}), 400
+
+    
 @app.route('/capture', methods=['POST'])
 def capture_face():
     data = request.get_json()
@@ -88,22 +159,76 @@ def capture_face():
 
     return jsonify({"message": "Images captured and stored successfully"}), 200
 
+# @app.route('/send-otp', methods=['POST'])
+# def send_otp_route():
+#     data = request.get_json()
+#     mobile_number = data.get('mobile')
+    
+#     if mobile_number:
+#         otp = generate_otp()
+#         otp_storage[mobile_number] = otp
+#         send_otp(mobile_number, otp)
+#         return jsonify({"success": True, "message": "OTP sent successfully"}), 200
+#     return jsonify({"success": False, "message": "Failed to send OTP"}), 400
+
+# @app.route('/verify-otp', methods=['POST'])
+# def verify_otp_route():
+    # data = request.get_json()
+    # mobile_number = data.get('mobile')
+    # entered_otp = data.get('otp')
+    
+    # if verify_otp(mobile_number, entered_otp):
+    #     return jsonify({"success": True, "message": "OTP verification successful"}), 200
+    # return jsonify({"success": False, "message": "OTP verification failed"}), 400
+
 
 @app.route('/recognize', methods=['POST'])
 def recognize_face():
     data = request.get_json()
+    print("=== RAW DATA RECEIVED ===")
+    print(data)
+    print("==========================")
     image_data = data.get('image', '')
-    region_id_str = data.get('regionId', '')
+    region_data = data.get('region', {})
 
-    try:
-        regionId = ObjectId(region_id_str)
-    except:
-        return jsonify({"error": "Invalid regionId format"}), 400
+
+
+    if not region_data:
+        print("Region data missing in request")
+        return jsonify({"error": "Missing region details"}), 400
+
+    # 3️⃣ Try to find matching region in MongoDB
+    region_match = mongo.db.regions.find_one({
+        "state": region_data.get("state"),
+        "district": region_data.get("district"),
+        "zone": region_data.get("zone"),
+        "taluk": region_data.get("taluk"),
+        "wardNo": region_data.get("wardNo"),
+        "pincode": region_data.get("pincode")
+    })
+    print("Region match:", region_match)
+
+    # 4️⃣ Return error if not found
+    if not region_match:
+        print("Region not found in database")
+        return jsonify({"error": "Region not found"}), 400
+
+    # 5️⃣ Extract regionId for next operations
+    regionId = region_match["_id"]
+
+
+    # 6️⃣ Get the image data
+    image_base64 = data.get('image', '')
+    if not image_base64:
+        print("Image data missing in request")
+        return jsonify({"error": "Image data missing"}), 400
+
 
     input_path = os.path.join(dataset_dir, 'temp.jpg')
     nparr = np.frombuffer(base64.b64decode(image_data), np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     if img is None:
+        print("Image decoding failed")
         return jsonify({"error": "Image decoding failed"}), 400
     cv2.imwrite(input_path, img)
 
@@ -135,17 +260,23 @@ def recognize_face():
         if best_match.get('regionId') != regionId:
             return jsonify({"name": best_match['label'], "message": "Region mismatch"}), 200
 
-        mongo.db.faces.update_one(
-            {"label": best_match['label']},
-            {"$set": {"hasVoted": True}}
-        )
+        voter = mongo.db.voters.find_one({"label": best_match['label']})
 
+        if voter:
+           mobile_number = voter.get("mobile_number")
+           otp = generate_otp()
+           otp_storage[mobile_number] = otp
+           otp_storage[f"{mobile_number}_voter"] = best_match  # store voter session
+           send_otp(mobile_number, otp)
+    
         return jsonify({
-            "name": best_match['label'],
-            "message": "Verification successful. Vote recorded.",
-        }), 200
-
-    return jsonify({"error": "Face not recognized"}), 400
+        "success": True,
+        "message": "Face recognized successfully. OTP sent.",
+        "name": best_match['label'],
+        "mobileNumber": mobile_number
+         }), 200
+    else:
+        return jsonify({"error": "Voter record not found"}), 404
 
 
 if __name__ == "__main__":

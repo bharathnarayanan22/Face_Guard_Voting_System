@@ -22,7 +22,7 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import VerifiedIcon from "@mui/icons-material/Verified";
 
-const socket = io("http://127.0.0.1:4000");
+//const socket = io("http://127.0.0.1:5000");
 
 const theme = createTheme({
   palette: {
@@ -124,12 +124,12 @@ const Screen = () => {
   const [taluks, setTaluks] = useState([]);
   const [wards, setWards] = useState([]);
   const [pincodes, setPincodes] = useState([]);
-  const [selectedState, setSelectedState] = useState("All");
-  const [selectedDistrict, setSelectedDistrict] = useState("All");
-  const [selectedZone, setSelectedZone] = useState("All");
-  const [selectedTaluk, setSelectedTaluk] = useState("All");
-  const [selectedWard, setSelectedWard] = useState("All");
-  const [selectedPincode, setSelectedPincode] = useState("All");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedZone, setSelectedZone] = useState("");
+  const [selectedTaluk, setSelectedTaluk] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [selectedPincode, setSelectedPincode] = useState("");
   const webcamRef = useRef(null);
 
   useEffect(() => {
@@ -137,12 +137,9 @@ const Screen = () => {
       try {
         const response = await axios.get("http://127.0.0.1:3000/regions");
         setRegions(response.data.regions || []);
-        const uniqueStates = [
-          { value: "All", label: "All States" },
-          ...[...new Set(response.data.regions.map((r) => r.state))]
-            .sort()
-            .map((s) => ({ value: s, label: s })),
-        ];
+        const uniqueStates = [...new Set(response.data.regions.map((r) => r.state))]
+          .sort()
+          .map((s) => ({ value: s, label: s }));
         setStates(uniqueStates);
       } catch (error) {
         console.error("Error fetching regions:", error);
@@ -153,140 +150,125 @@ const Screen = () => {
 
   useEffect(() => {
     const filteredDistricts = [
-      { value: "All", label: "All Districts" },
-      ...[
-        ...new Set(
-          regions
-            .filter(
-              (region) =>
-                selectedState === "All" || region.state === selectedState
-            )
-            .map((region) => region.district)
-        ),
-      ]
-        .sort()
-        .map((district) => ({ value: district, label: district })),
-    ];
+      ...new Set(
+        regions
+          .filter(
+            (region) =>
+              selectedState === "" || region.state === selectedState
+          )
+          .map((region) => region.district)
+      ),
+    ]
+      .sort()
+      .map((district) => ({ value: district, label: district }));
     setDistricts(filteredDistricts);
     if (
-      selectedDistrict !== "All" &&
+      selectedDistrict !== "" &&
       !filteredDistricts.some((d) => d.value === selectedDistrict)
     ) {
-      setSelectedDistrict("All");
+      setSelectedDistrict("");
     }
   }, [selectedState, regions]);
 
   useEffect(() => {
     const filteredZones = [
-      { value: "All", label: "All Zones" },
-      ...[
-        ...new Set(
-          regions
-            .filter(
-              (region) =>
-                (selectedState === "All" || region.state === selectedState) &&
-                (selectedDistrict === "All" ||
-                  region.district === selectedDistrict)
-            )
-            .map((region) => region.zone)
-        ),
-      ]
-        .sort()
-        .map((zone) => ({ value: zone, label: zone })),
-    ];
+      ...new Set(
+        regions
+          .filter(
+            (region) =>
+              (selectedState === "" || region.state === selectedState) &&
+              (selectedDistrict === "" ||
+                region.district === selectedDistrict)
+          )
+          .map((region) => region.zone)
+      ),
+    ]
+      .sort()
+      .map((zone) => ({ value: zone, label: zone }));
     setZones(filteredZones);
     if (
-      selectedZone !== "All" &&
+      selectedZone !== "" &&
       !filteredZones.some((z) => z.value === selectedZone)
     ) {
-      setSelectedZone("All");
+      setSelectedZone("");
     }
   }, [selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
     const filteredTaluks = [
-      { value: "All", label: "All Taluks" },
-      ...[
-        ...new Set(
-          regions
-            .filter(
-              (region) =>
-                (selectedState === "All" || region.state === selectedState) &&
-                (selectedDistrict === "All" ||
-                  region.district === selectedDistrict) &&
-                (selectedZone === "All" || region.zone === selectedZone)
-            )
-            .map((region) => region.taluk)
-        ),
-      ]
-        .sort()
-        .map((taluk) => ({ value: taluk, label: taluk })),
-    ];
+      ...new Set(
+        regions
+          .filter(
+            (region) =>
+              (selectedState === "" || region.state === selectedState) &&
+              (selectedDistrict === "" ||
+                region.district === selectedDistrict) &&
+              (selectedZone === "" || region.zone === selectedZone)
+          )
+          .map((region) => region.taluk)
+      ),
+    ]
+      .sort()
+      .map((taluk) => ({ value: taluk, label: taluk }));
     setTaluks(filteredTaluks);
     if (
-      selectedTaluk !== "All" &&
+      selectedTaluk !== "" &&
       !filteredTaluks.some((t) => t.value === selectedTaluk)
     ) {
-      setSelectedTaluk("All");
+      setSelectedTaluk("");
     }
   }, [selectedZone, selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
     const filteredWards = [
-      { value: "All", label: "All Wards" },
-      ...[
-        ...new Set(
-          regions
-            .filter(
-              (region) =>
-                (selectedState === "All" || region.state === selectedState) &&
-                (selectedDistrict === "All" ||
-                  region.district === selectedDistrict) &&
-                (selectedZone === "All" || region.zone === selectedZone) &&
-                (selectedTaluk === "All" || region.taluk === selectedTaluk)
-            )
-            .map((region) => region.wardNo)
-        ),
-      ]
-        .sort((a, b) => a - b)
-        .map((wardNo) => ({ value: wardNo, label: wardNo })),
-    ];
+      ...new Set(
+        regions
+          .filter(
+            (region) =>
+              (selectedState === "" || region.state === selectedState) &&
+              (selectedDistrict === "" ||
+                region.district === selectedDistrict) &&
+              (selectedZone === "" || region.zone === selectedZone) &&
+              (selectedTaluk === "" || region.taluk === selectedTaluk)
+          )
+          .map((region) => region.wardNo)
+      ),
+    ]
+      .sort((a, b) => a - b)
+      .map((wardNo) => ({ value: wardNo, label: wardNo }));
     setWards(filteredWards);
     if (
-      selectedWard !== "All" &&
+      selectedWard !== "" &&
       !filteredWards.some((w) => w.value === selectedWard)
     ) {
-      setSelectedWard("All");
+      setSelectedWard("");
     }
   }, [selectedTaluk, selectedZone, selectedDistrict, selectedState, regions]);
 
   useEffect(() => {
     const filteredPincodes = [
-      { value: "All", label: "All Pincodes" },
-      ...[
-        ...new Set(
-          regions
-            .filter(
-              (region) =>
-                (selectedState === "All" || region.state === selectedState) &&
-                (selectedDistrict === "All" ||
-                  region.district === selectedDistrict) &&
-                (selectedZone === "All" || region.zone === selectedZone) &&
-                (selectedTaluk === "All" || region.taluk === selectedTaluk) &&
-                (selectedWard === "All" || region.wardNo === selectedWard)
-            )
-            .map((region) => region.pincode)
-        ),
-      ]
-        .sort()
-        .map((pincode) => ({ value: pincode, label: pincode })),
-    ];
+      ...new Set(
+        regions
+          .filter(
+            (region) =>
+              (selectedState === "" || region.state === selectedState) &&
+              (selectedDistrict === "" ||
+                region.district === selectedDistrict) &&
+              (selectedZone === "" || region.zone === selectedZone) &&
+              (selectedTaluk === "" || region.taluk === selectedTaluk) &&
+              (selectedWard === "" || region.wardNo === selectedWard)
+          )
+          .map((region) => region.pincode)
+      ),
+    ]
+      .sort()
+      .map((pincode) => ({ value: pincode, label: pincode }));
     setPincodes(filteredPincodes);
     if (
-      selectedPincode !== "All" &&
+      selectedPincode !== "" &&
       !filteredPincodes.some((p) => p.value === selectedPincode)
     ) {
-      setSelectedPincode("All");
+      setSelectedPincode("");
     }
   }, [
     selectedWard,
@@ -305,14 +287,16 @@ const Screen = () => {
         const response = await axios.post("http://127.0.0.1:5000/recognize", {
           image: imageSrc.split(",")[1],
           region: {
-            state: selectedState === "All" ? undefined : selectedState,
-            district: selectedDistrict === "All" ? undefined : selectedDistrict,
-            zone: selectedZone === "All" ? undefined : selectedZone,
-            taluk: selectedTaluk === "All" ? undefined : selectedTaluk,
-            wardNo: selectedWard === "All" ? undefined : selectedWard,
-            pincode: selectedPincode === "All" ? undefined : selectedPincode,
+            state: selectedState || undefined,
+            district: selectedDistrict || undefined,
+            zone: selectedZone || undefined,
+            taluk: selectedTaluk || undefined,
+            wardNo: selectedWard || undefined,
+            pincode: selectedPincode || undefined,
           },
         });
+
+        console.log("Recognition response:", response.data);
 
         if (response.data.error) throw new Error(response.data.error);
 
@@ -341,22 +325,22 @@ const Screen = () => {
   const verifyOtp = async () => {
     try {
       const response = await axios.post("http://127.0.0.1:5000/verify-otp", {
-        mobile: mobileNumber,
+        mobileNumber,
         otp,
       });
 
       if (response.data.success) {
-        socket.emit("verifiedVoter", {
-          region: {
-            state: selectedState === "All" ? undefined : selectedState,
-            district: selectedDistrict === "All" ? undefined : selectedDistrict,
-            zone: selectedZone === "All" ? undefined : selectedZone,
-            taluk: selectedTaluk === "All" ? undefined : selectedTaluk,
-            wardNo: selectedWard === "All" ? undefined : selectedWard,
-            pincode: selectedPincode === "All" ? undefined : selectedPincode,
-          },
-          voter: response.data.voter,
-        });
+        // socket.emit("verifiedVoter", {
+        //   region: {
+        //     state: selectedState || undefined,
+        //     district: selectedDistrict || undefined,
+        //     zone: selectedZone || undefined,
+        //     taluk: selectedTaluk || undefined,
+        //     wardNo: selectedWard || undefined,
+        //     pincode: selectedPincode || undefined,
+        //   },
+        //   voter: response.data.voter,
+        // });
         setResult("OTP verified. Vote submitted successfully.");
         setShowOtpPopup(false);
       } else {
