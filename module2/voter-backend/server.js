@@ -11,14 +11,17 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("New client connected:", socket.id);
 
-  socket.on("unlockVoting", (data) => {
-    console.log("Unlock event:", data);
-    io.emit("unlockVoting", data);  // broadcast to all clients
+  socket.on("verifiedVoter", (data) => {
+    console.log("Verified voter event:", data);
+    io.emit("verifiedVoter", {
+      voterId: data.voterId,
+      regionId: data.regionId
+    });  // Broadcast voterId and regionId
   });
 
   socket.on("lockVoting", (data) => {
     console.log("Lock event:", data);
-    io.emit("lockVoting", data);    // broadcast again
+    io.emit("lockVoting", data);  // Broadcast lock event
   });
 
   socket.on("disconnect", () => {
@@ -26,4 +29,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => console.log("✅ Socket.IO server running on 5000"));
+server.listen(6000, () => console.log("✅ Socket.IO server running on 5000"));
