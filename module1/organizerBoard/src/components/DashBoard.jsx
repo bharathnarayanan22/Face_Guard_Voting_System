@@ -1,527 +1,215 @@
 import React, { useState } from "react";
-import { styled, ThemeProvider, createTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Drawer from "@mui/material/Drawer";
-import CssBaseline from "@mui/material/CssBaseline";
-import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import MapIcon from "@mui/icons-material/Map";
-import AddLocationIcon from "@mui/icons-material/AddLocation";
-import ListItemText from "@mui/material/ListItemText";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import GroupsIcon from "@mui/icons-material/Groups";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import List from "@mui/material/List";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import { useNavigate } from "react-router-dom";
-import p1 from "../assets/pngegg (7).png";
-import p2 from "../assets/pngegg (6).png";
-import p3 from "../assets/pngegg (9).png";
-import p4 from "../assets/pngegg (4).png";
-import p5 from "../assets/pngegg (12).png";
-import p6 from "../assets/pngegg (2).png";
-import chakra from "../assets/chakra.png";
-import government from "../assets/government.png";
 import EnrollVoterForm from "../pages/VoterForm";
 import EnrollPartyForm from "../pages/PartyForm";
 import ViewPartyPage from "../pages/ViewParties";
 import ViewVoterPage from "../pages/ViewVoters";
 import RegionForm from "../pages/RegionForm";
 import ViewRegions from "../pages/ViewRegions";
-import logo1 from "../assets/logo1.png";
+import ViewLiveResultPage from "../pages/ResultPage";
 
-const drawerWidth = 240;
+// ─── Design Tokens ────────────────────────────────────────────────
+const C = {
+  saffron: "#FF9933", saffronLight: "#FFB347",
+  green: "#138808", greenLight: "#1aad0a",
+  navy: "#0a0f2e", navyMid: "#111936",
+  white: "#FFFFFF", muted: "#8892B0",
+  border: "rgba(255,153,51,0.15)",
+  glass: "rgba(255,255,255,0.04)",
+};
 
-const Main = styled("main")(({ theme }) => ({
-  flexGrow: 1,
-  padding: theme.spacing(3),
-  width: "100%",
-}));
+const NAV_ITEMS = [
+  { view: "CreateRegion",  label: "Create Region",  icon: "🗺️",  accent: C.saffron },
+  { view: "EnrollVoter",   label: "Enroll Voter",   icon: "👤",  accent: C.green },
+  { view: "EnrollParty",   label: "Enroll Party",   icon: "🏛️",  accent: "#4A90D9" },
+  { view: "ViewRegions",   label: "View Regions",   icon: "📍",  accent: C.saffron },
+  { view: "ViewVoters",    label: "View Voters",    icon: "👥",  accent: C.green },
+  { view: "ViewParties",   label: "View Parties",   icon: "🎯",  accent: "#4A90D9" },
+  { view: "LiveResults",   label: "Live Results",   icon: "📡",  accent: "#E040FB" },
+];
 
-const AppBar = styled(MuiAppBar)(({ theme }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  background:
-    "linear-gradient(90deg, #FF9933 0%, #FF9933 30%, #FFFFFF 40%, #FFFFFF 60%, #138808 70%, #138808 100%)",
-  color: "#000",
-  width: "100%",
-  position: "fixed",
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    transform: "translate(-50%, -50%)",
-    left: "50%",
-    top: "50%",
-    width: "100px",
-    height: "50px",
-    backgroundImage: `url(${chakra})`,
-    backgroundSize: "contain",
-    backgroundRepeat: "no-repeat",
-    opacity: 1,
-    transition: "opacity 0.3s ease",
-    [theme.breakpoints.down("sm")]: {
-      top: "10%",
-      transform: "translateX(-50%)",
-      opacity: 0.2,
-    },
-  },
-}));
+const CARD_DESCS = {
+  CreateRegion: "Add new electoral regions with state, district, taluk & ward details.",
+  EnrollVoter:  "Register new voters with biometric capture and region assignment.",
+  EnrollParty:  "Register political parties and assign them to electoral regions.",
+  ViewRegions:  "Browse and search all electoral regions, view voters & parties.",
+  ViewVoters:   "Manage voter database, view profiles, and download records.",
+  ViewParties:  "Manage registered parties, edit details, and filter by region.",
+  LiveResults:  "Real-time vote counts, turnout stats, and regional result filters.",
+};
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
-  backgroundColor: "#ff9933",
-}));
-
-const StyledDrawer = styled(Drawer)(({ theme }) => ({
-  "& .MuiDrawer-paper": {
-    width: drawerWidth,
-    backgroundColor: "#ff9933",
-    color: "white",
-    borderRight: "none",
-    zIndex: theme.zIndex.drawer,
-  },
-}));
-
-const StyledList = styled(List)(({ theme }) => ({
-  paddingTop: 0,
-  "& .MuiListItemText-primary": {
-    fontFamily: '"Dancing Script", cursive', // Beautiful cursive font
-    fontStyle: "italic",
-    fontWeight: 700, // Bold italic
-    fontSize: "1.1rem",
-    letterSpacing: "0.5px",
-  },
-}));
-
-const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
-  color: "white",
-  "&:hover": {
-    backgroundColor: "#138808",
-  },
-  "&.Mui-selected": {
-    backgroundColor: "#138808",
-    "&:hover": {
-      backgroundColor: "#138808",
-    },
-  },
-}));
-
-const StyledListItemIcon = styled(ListItemIcon)({
-  color: "inherit",
-});
-
-const StyledTypography = styled(Typography)(({ theme }) => ({
-  color: "#fff",
-  fontWeight: "bold",
-  fontFamily: '"Dancing Script", cursive',
-  fontStyle: "italic",
-  letterSpacing: "0.05em",
-  textTransform: "uppercase",
-  // WebkitTextStroke: "1px black", // Black outline for text
-  textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)", // Subtle shadow for depth
-  [theme.breakpoints.down("sm")]: {
-    fontSize: "1rem", // Smaller font size on mobile
-    // WebkitTextStroke: "1px black", // Thinner stroke on smaller screens
-    textShadow: "2px 2px 4px rgba(0, 0, 0, 1)",
-  },
-}));
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#ff9933",
-    },
-    secondary: {
-      main: "#138808",
-    },
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: {
-        "@global": {
-          "@keyframes glitter": {
-            "0%": {
-              transform: "rotate(30deg) translate(-30%, -30%)",
-            },
-            "100%": {
-              transform: "rotate(30deg) translate(30%, 30%)",
-            },
-          },
-        },
-      },
-    },
-  },
-});
-
-export default function OrganizerDashboard() {
-  const [open, setOpen] = useState(false);
+export default function DashBoard() {
   const [selectedView, setSelectedView] = useState(null);
-  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
-
-  const handleMenuItemClick = (view) => {
-    setSelectedView(view);
-    setOpen(false);
-  };
-
-  const handleCardClick = (view) => {
-    setSelectedView(view);
-    setOpen(false);
-  };
+  const active = NAV_ITEMS.find(n => n.view === selectedView);
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <div
-          style={{
-            backgroundImage: `url(${chakra})`,
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed",
-            opacity: 0.2,
-            height: "100vh",
-            width: "100vw",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: -1,
-            pointerEvents: "none",
-          }}
-        />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0a0f2e; font-family: 'Outfit', sans-serif; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideIn { from{transform:translateX(-100%)} to{transform:translateX(0)} }
+        .fade-up { animation: fadeUp 0.45s ease both; }
+        .card-item { transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; cursor: pointer; }
+        .card-item:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,0.35) !important; }
+        .nav-btn { transition: background 0.15s, transform 0.1s; cursor: pointer; border: none; }
+        .nav-btn:hover { background: rgba(255,255,255,0.08) !important; }
+        .nav-btn.active { background: rgba(255,153,51,0.12) !important; border-left: 3px solid #FF9933 !important; }
+        .icon-btn { background: none; border: none; cursor: pointer; display:flex; align-items:center; justify-content:center; border-radius:8px; transition: background 0.15s; }
+        .icon-btn:hover { background: rgba(255,255,255,0.08); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,153,51,0.25); border-radius: 3px; }
+      `}</style>
 
-        <CssBaseline />
-        <AppBar position="fixed" open={open}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={open ? handleDrawerClose : handleDrawerOpen}
-              sx={{ mr: 2, color: "#fff" }}
-            >
-              {open ? <ChevronLeftIcon /> : <MenuIcon />}
-            </IconButton>
+      <div style={{ minHeight: "100vh", background: `linear-gradient(135deg, ${C.navy} 0%, #0d1535 50%, #0a1a10 100%)`, fontFamily: "'Outfit', sans-serif", color: C.white, display: "flex", flexDirection: "column" }}>
 
-            <StyledTypography variant="h6" noWrap>
-              Election Organizer Dashboard
-            </StyledTypography>
-          </Toolbar>
-        </AppBar>
+        {/* Background orbs */}
+        <div style={{ position: "fixed", top: "-15%", left: "-10%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,153,51,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+        <div style={{ position: "fixed", bottom: "-20%", right: "-10%", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(19,136,8,0.06) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+        <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(255,153,51,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,153,51,0.025) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none", zIndex: 0 }} />
 
-        <StyledDrawer
-          variant="temporary"
-          open={open}
-          onClose={handleDrawerClose}
-          ModalProps={{ keepMounted: true }}
-        >
-          <DrawerHeader />
-          <Divider sx={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }} />
-          <StyledList>
-            {[
-              {
-                view: "CreateRegion",
-                text: "Create Region",
-                icon: <AddLocationIcon />,
-              },
-              {
-                view: "EnrollVoter",
-                text: "Enroll Voter",
-                icon: <PersonAddIcon />,
-              },
-              {
-                view: "EnrollParty",
-                text: "Enroll Party",
-                icon: <GroupAddIcon />,
-              },
-              { view: "ViewRegions", text: "View Regions", icon: <MapIcon /> },
-              {
-                view: "ViewVoters",
-                text: "View Voters",
-                icon: <PeopleAltIcon />,
-              },
-              {
-                view: "ViewParties",
-                text: "View Parties",
-                icon: <GroupsIcon />,
-              },
-            ].map((item, index) => (
-              <React.Fragment key={item.view}>
-                <StyledListItemButton
-                  onClick={() => handleMenuItemClick(item.view)}
-                  selected={selectedView === item.view}
-                >
-                  <StyledListItemIcon>{item.icon}</StyledListItemIcon>
-                  <ListItemText primary={item.text} />
-                </StyledListItemButton>
-                {index < 5 && (
-                  <Divider sx={{ backgroundColor: "#fff", mx: "auto" }} />
-                )}
-              </React.Fragment>
+        {/* Topbar */}
+        <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(10,15,46,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,153,51,0.12)", height: 64, display: "flex", alignItems: "center", padding: "0 20px", gap: 16 }}>
+          <button className="icon-btn" style={{ width: 40, height: 40, color: C.white }} onClick={() => setSidebarOpen(v => !v)}>
+            {sidebarOpen ? "✕" : "☰"}
+          </button>
+
+          {/* Tricolor divider */}
+          <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
+            {[C.saffron, C.white, C.green].map((c, i) => (
+              <div key={i} style={{ width: 4, height: 28, background: c, borderRadius: 2, opacity: 0.9 }} />
             ))}
-          </StyledList>
-          <Box sx={{ marginTop: "auto", padding: 2 }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                mb: 2,
-              }}
-            >
-              <img
-                src={government}
-                alt="Government Logo"
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                }}
-              />
-            </Box>
-          </Box>
-        </StyledDrawer>
+          </div>
 
-        <Main>
-          <Toolbar />
-          {selectedView === null && (
-            <Box
-              sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-around",
-                gap: 12,
-                padding: 4,
-              }}
-            >
-              {[
-                { view: "CreateRegion", text: "Create Region", icon: p6 },
-                { view: "EnrollVoter", text: "Enroll Voter", icon: p2 },
-                { view: "EnrollParty", text: "Enroll Party", icon: p3 },
-                { view: "ViewRegions", text: "View Regions", icon: p5 },
-                { view: "ViewVoters", text: "View Voters", icon: p1 },
-                { view: "ViewParties", text: "View Parties", icon: p4 },
-              ].map((item) => (
-                <Card
-                  key={item.view}
-                  sx={{
-                    width: { xs: "100%", sm: "45%", md: "30%", lg: "20%" },
-                    borderRadius: 5,
-                    cursor: "pointer",
-                    transition: "all 0.3s ease-in-out",
-                    boxShadow:
-                      "0 4px 8px rgba(0,0,0,0.2), 0 0 12px rgba(255, 215, 0, 0.3)",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    position: "relative",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                      boxShadow:
-                        "0 6px 16px rgba(0,0,0,0.25), 0 0 24px rgba(255, 215, 0, 0.6)",
-                      "& .topSection": {
-                        backgroundColor: "#FF9933",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          top: "-50%",
-                          left: "-50%",
-                          width: "200%",
-                          height: "200%",
-                          background: `linear-gradient(
-                            to bottom right,
-                            rgba(255,255,255,0) 0%,
-                            rgba(255,255,255,0.8) 50%,
-                            rgba(255,255,255,0) 100%
-                          )`,
-                          transform: "rotate(30deg)",
-                          animation: "glitter 3s infinite linear",
-                        },
-                      },
-                    },
-                  }}
-                  onClick={() => handleCardClick(item.view)}
-                >
-                  <Box
-                    className="topSection"
-                    sx={{
-                      backgroundColor: "#138808",
-                      flex: 1,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      padding: 2,
-                      minHeight: 150,
-                      position: "relative",
-                      overflow: "hidden",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        height: 100,
-                        width: "auto",
-                        objectFit: "contain",
-                        transition: "all 0.3s ease-in-out",
-                        position: "relative",
-                        zIndex: 2,
-                        "&:hover": {
-                          transform: "scale(1.1)",
-                        },
-                      }}
-                      image={item.icon}
-                      alt={item.text}
-                    />
-                  </Box>
-                  <Box
-                    sx={{
-                      backgroundColor: "white",
-                      padding: 2,
-                      textAlign: "center",
-                      borderTop: "2px solid #138808",
-                      transition: "all 0.3s ease-in-out",
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        color: "#1976d2",
-                        fontFamily: '"Dancing Script", cursive',
-                        fontStyle: "italic",
-                        fontWeight: 700,
-                        fontSize: "1.2rem",
-                        letterSpacing: "0.5px",
-                        transition: "all 0.3s ease-in-out",
-                        "&:hover": {
-                          color: "#0d47a1",
-                        },
-                      }}
-                    >
-                      {item.text}
-                    </Typography>
-                  </Box>
-                </Card>
-              ))}
-            </Box>
-          )}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 10, color: C.saffron, letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 700 }}>Election Commission of India</div>
+            <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em" }}>Organizer Dashboard</div>
+          </div>
+
           {selectedView && (
-            <Box
-              sx={{
-                maxWidth:
-                  selectedView === "ViewRegions" ||
-                  selectedView === "ViewVoters" ||
-                  selectedView === "ViewParties"
-                    ? "none" 
-                    : "800px",
-                width:
-                  selectedView === "ViewRegions" ||
-                  selectedView === "ViewVoters" ||
-                  selectedView === "ViewParties"
-                    ? "90vw" 
-                    : "auto",
-                minHeight:
-                  selectedView === "ViewRegions" ||
-                  selectedView === "ViewVoters" ||
-                  selectedView === "ViewParties"
-                    ? "500px"
-                    : "300px",
-                mx: "auto",
-                mt: 2,
-                overflow: "auto", // Changed from "hidden" to "auto" for scrollable content
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-                borderRadius: 2,
-                position: "relative",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  borderRadius: 2,
-                  padding: "3px",
-                  background:
-                    "linear-gradient(90deg, #FF9933 0%, #FFFFFF 50%, #138808 100%)",
-                  WebkitMask:
-                    "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-                  WebkitMaskComposite: "xor",
-                  maskComposite: "exclude",
-                  pointerEvents: "none",
-                },
-              }}
-            >
-              {/* Title Section - Orange Background */}
-              <Box
-                sx={{
-                  bgcolor: "#FF9933",
-                  color: "white",
-                  p: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  borderBottom: "2px solid #138808",
-                }}
-              >
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 600,
-                    fontFamily: '"Dancing Script", cursive',
-                    fontStyle: "italic",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {selectedView.replace(/([A-Z])/g, " $1").trim()}
-                </Typography>
-                <IconButton
-                  onClick={() => setSelectedView(null)}
-                  sx={{ color: "white" }}
-                >
-                  <ChevronLeftIcon />
-                </IconButton>
-              </Box>
-
-              {/* Content Section - White Background */}
-              <Box
-                sx={{
-                  bgcolor: "white",
-                  p: 3,
-                  minHeight: "300px",
-                  width: "100%", // Ensure content takes full width
-                }}
-              >
-                {selectedView === "CreateRegion" && <RegionForm />}
-                {selectedView === "EnrollVoter" && <EnrollVoterForm />}
-                {selectedView === "EnrollParty" && <EnrollPartyForm />}
-                {selectedView === "ViewRegions" && <ViewRegions />}
-                {selectedView === "ViewVoters" && <ViewVoterPage />}
-                {selectedView === "ViewParties" && <ViewPartyPage />}
-              </Box>
-            </Box>
+            <button className="icon-btn" style={{ padding: "8px 14px", color: C.muted, fontSize: 13, fontFamily: "'Outfit', sans-serif" }} onClick={() => setSelectedView(null)}>
+              ← Back
+            </button>
           )}
-        </Main>
-      </Box>
-    </ThemeProvider>
+        </header>
+
+        {/* Sidebar */}
+        {sidebarOpen && (
+          <>
+            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99, backdropFilter: "blur(4px)" }} onClick={() => setSidebarOpen(false)} />
+            <aside style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 260, background: "rgba(10,15,46,0.97)", backdropFilter: "blur(16px)", borderRight: "1px solid rgba(255,153,51,0.12)", zIndex: 200, animation: "slideIn 0.25s ease", display: "flex", flexDirection: "column" }}>
+              {/* Sidebar header */}
+              <div style={{ padding: "20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ display: "flex", gap: 3 }}>
+                  {[C.saffron, C.white, C.green].map((c, i) => <div key={i} style={{ width: 4, height: 32, background: c, borderRadius: 2 }} />)}
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: C.saffron, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700 }}>ECI</div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>Navigation</div>
+                </div>
+                <button className="icon-btn" style={{ marginLeft: "auto", color: C.muted, width: 32, height: 32 }} onClick={() => setSidebarOpen(false)}>✕</button>
+              </div>
+
+              {/* Nav items */}
+              <nav style={{ flex: 1, padding: "12px 0", overflowY: "auto" }}>
+                {NAV_ITEMS.map(item => (
+                  <button
+                    key={item.view}
+                    className={`nav-btn ${selectedView === item.view ? "active" : ""}`}
+                    style={{ display: "flex", alignItems: "center", gap: 14, width: "100%", padding: "13px 20px", color: selectedView === item.view ? C.saffron : C.white, background: "transparent", borderLeft: selectedView === item.view ? `3px solid ${C.saffron}` : "3px solid transparent", textAlign: "left", fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: selectedView === item.view ? 700 : 500 }}
+                    onClick={() => { setSelectedView(item.view); setSidebarOpen(false); }}
+                  >
+                    <span style={{ fontSize: 18, width: 24, textAlign: "center" }}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+
+              {/* Sidebar footer */}
+              <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 11, color: C.muted, textAlign: "center", letterSpacing: "0.05em" }}>
+                🇮🇳 Election Commission of India
+              </div>
+            </aside>
+          </>
+        )}
+
+        {/* Main content */}
+        <main style={{ flex: 1, paddingTop: 64, position: "relative", zIndex: 1 }}>
+          {!selectedView ? (
+            // ── Dashboard Home ──
+            <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 20px" }}>
+              {/* Hero */}
+              <div style={{ textAlign: "center", marginBottom: 48 }} className="fade-up">
+                <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 18 }}>
+                  {[C.saffron, C.white, C.green].map((c, i) => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, boxShadow: `0 0 12px ${c}` }} />)}
+                </div>
+                <div style={{ fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: C.saffron, marginBottom: 8, fontWeight: 700 }}>Election Commission of India</div>
+                <h1 style={{ fontSize: "clamp(26px, 4vw, 44px)", fontWeight: 900, letterSpacing: "-0.02em", background: `linear-gradient(135deg, ${C.saffron}, ${C.white} 45%, ${C.greenLight})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>
+                  Organizer Dashboard
+                </h1>
+                <p style={{ fontSize: 15, color: C.muted }}>Manage elections, voters, parties and regions</p>
+              </div>
+
+              {/* Cards grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+                {NAV_ITEMS.map((item, i) => (
+                  <div
+                    key={item.view}
+                    className="card-item fade-up"
+                    style={{ background: C.glass, border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 20, overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,0.2)", animationDelay: `${i * 0.06}s` }}
+                    onClick={() => setSelectedView(item.view)}
+                  >
+                    {/* Card top accent */}
+                    <div style={{ height: 3, background: `linear-gradient(90deg, ${item.accent}, transparent)` }} />
+                    <div style={{ padding: "24px" }}>
+                      {/* Icon area */}
+                      <div style={{ width: 52, height: 52, borderRadius: 14, background: `${item.accent}18`, border: `1px solid ${item.accent}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, marginBottom: 16 }}>
+                        {item.icon}
+                      </div>
+                      <div style={{ fontSize: 17, fontWeight: 700, color: C.white, marginBottom: 6 }}>{item.label}</div>
+                      <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.5 }}>{CARD_DESCS[item.view]}</div>
+                      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: item.accent, fontWeight: 600 }}>
+                        Open <span style={{ fontSize: 14 }}>→</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            // ── Sub-page view ──
+            <div style={{ maxWidth: selectedView.startsWith("View") ? "100%" : 960, margin: "0 auto", padding: "28px 20px" }} className="fade-up">
+              {/* Page header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: `${active?.accent || C.saffron}18`, border: `1px solid ${active?.accent || C.saffron}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>
+                  {active?.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: C.saffron, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700 }}>Election Commission</div>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, color: C.white, letterSpacing: "-0.01em" }}>{active?.label}</h2>
+                </div>
+              </div>
+
+              {/* Content card */}
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, overflow: "hidden" }}>
+                <div style={{ borderTop: `3px solid ${active?.accent || C.saffron}` }} />
+                <div style={{ padding: "28px" }}>
+                  {selectedView === "CreateRegion"  && <RegionForm />}
+                  {selectedView === "EnrollVoter"   && <EnrollVoterForm />}
+                  {selectedView === "EnrollParty"   && <EnrollPartyForm />}
+                  {selectedView === "ViewRegions"   && <ViewRegions />}
+                  {selectedView === "ViewVoters"    && <ViewVoterPage />}
+                  {selectedView === "ViewParties"   && <ViewPartyPage />}
+                  {selectedView === "LiveResults"   && <ViewLiveResultPage />}
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
