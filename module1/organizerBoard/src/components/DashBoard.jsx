@@ -5,7 +5,6 @@ import ViewPartyPage from "../pages/ViewParties";
 import ViewVoterPage from "../pages/ViewVoters";
 import RegionForm from "../pages/RegionForm";
 import ViewRegions from "../pages/ViewRegions";
-import ViewLiveResultPage from "../pages/ResultPage";
 
 // ─── Design Tokens ────────────────────────────────────────────────
 const C = {
@@ -24,7 +23,6 @@ const NAV_ITEMS = [
   { view: "ViewRegions",   label: "View Regions",   icon: "📍",  accent: C.saffron },
   { view: "ViewVoters",    label: "View Voters",    icon: "👥",  accent: C.green },
   { view: "ViewParties",   label: "View Parties",   icon: "🎯",  accent: "#4A90D9" },
-  { view: "LiveResults",   label: "Live Results",   icon: "📡",  accent: "#E040FB" },
 ];
 
 const CARD_DESCS = {
@@ -34,7 +32,6 @@ const CARD_DESCS = {
   ViewRegions:  "Browse and search all electoral regions, view voters & parties.",
   ViewVoters:   "Manage voter database, view profiles, and download records.",
   ViewParties:  "Manage registered parties, edit details, and filter by region.",
-  LiveResults:  "Real-time vote counts, turnout stats, and regional result filters.",
 };
 
 export default function DashBoard() {
@@ -88,6 +85,13 @@ export default function DashBoard() {
             <div style={{ fontSize: 10, color: C.saffron, letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 700 }}>Election Commission of India</div>
             <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em" }}>Organizer Dashboard</div>
           </div>
+
+          <button
+            onClick={() => window.open("/results", "_blank")}
+            style={{ display: "flex", alignItems: "center", gap: 7, background: "linear-gradient(135deg, #E040FB22, #E040FB11)", border: "1px solid #E040FB55", borderRadius: 10, padding: "8px 16px", color: "#E040FB", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Outfit', sans-serif", letterSpacing: "0.05em", flexShrink: 0 }}
+          >
+            📡 Live Results
+          </button>
 
           {selectedView && (
             <button className="icon-btn" style={{ padding: "8px 14px", color: C.muted, fontSize: 13, fontFamily: "'Outfit', sans-serif" }} onClick={() => setSelectedView(null)}>
@@ -203,7 +207,6 @@ export default function DashBoard() {
                   {selectedView === "ViewRegions"   && <ViewRegions />}
                   {selectedView === "ViewVoters"    && <ViewVoterPage />}
                   {selectedView === "ViewParties"   && <ViewPartyPage />}
-                  {selectedView === "LiveResults"   && <ViewLiveResultPage />}
                 </div>
               </div>
             </div>

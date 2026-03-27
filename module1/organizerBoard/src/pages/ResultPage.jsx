@@ -66,10 +66,8 @@ const ViewLiveResultPage = () => {
   const [selectedTaluk, setSelectedTaluk] = useState("");
   const [selectedWard, setSelectedWard] = useState("");
   const isMobile = useIsMobile();
-  const activeRegionFilterId = selectedWard || "";
-
   useEffect(() => { fetchAllData(); }, []);
-  useEffect(() => { applyRegionFilter(); }, [activeRegionFilterId, parties]);
+  useEffect(() => { applyRegionFilter(); }, [selectedState, selectedDistrict, selectedTaluk, selectedWard, parties, regions]);
 
   useEffect(() => {
     if (!regions.length) { setVisibleVoters(0); return; }
@@ -85,20 +83,62 @@ const ViewLiveResultPage = () => {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [regRes, , resultsRes] = await Promise.all([
+      const [regRes, partiesRes, resultsRes] = await Promise.all([
         axios.get("http://127.0.0.1:3000/regions"),
-        axios.get("http://127.0.0.1:3000/voters"),
+        axios.get("http://127.0.0.1:3000/parties"),
         axios.get("http://127.0.0.1:5000/results"),
       ]);
       setRegions(regRes.data.regions || []);
-      setParties(resultsRes.data.parties || []);
-      setTotalVotes(resultsRes.data.parties.reduce((s, p) => s + Number(p.VoteCount || 0), 0));
+
+      // Merge: all registered parties get VoteCount=0, then overlay actual counts
+      const allParties = partiesRes.data.parties || [];
+      const resultMap = {};
+      (resultsRes.data.parties || []).forEach(p => {
+        const id = p._id || p.id || "";
+        resultMap[id] = Number(p.VoteCount || p.voteCount || p.vote_count || 0);
+      });
+      const merged = allParties.map(p => {
+        const id = p._id || p.id || "";
+        return { ...p, VoteCount: resultMap[id] ?? 0 };
+      });
+
+      setParties(merged);
+      setTotalVotes(merged.reduce((s, p) => s + p.VoteCount, 0));
     } catch (err) { console.error("Data fetch error:", err); }
     finally { setLoading(false); }
   };
 
   const applyRegionFilter = () => {
-    const filtered = activeRegionFilterId ? parties.filter(p => p.regionId === activeRegionFilterId) : parties;
+    if (!parties.length) return;
+
+    // Helper: get regionId from party (handle both field names)
+    const getRegionId = (p) => p.regionId || p.region || p.region_id || "";
+
+    let filtered = [...parties];
+
+    if (selectedWard) {
+      filtered = parties.filter(p => getRegionId(p) === selectedWard);
+    } else if (selectedTaluk) {
+      const matchingIds = new Set(
+        regions
+          .filter(r => r.state === selectedState && r.district === selectedDistrict && r.taluk === selectedTaluk)
+          .map(r => r._id)
+      );
+      filtered = parties.filter(p => matchingIds.has(getRegionId(p)));
+    } else if (selectedDistrict) {
+      const matchingIds = new Set(
+        regions
+          .filter(r => r.state === selectedState && r.district === selectedDistrict)
+          .map(r => r._id)
+      );
+      filtered = parties.filter(p => matchingIds.has(getRegionId(p)));
+    } else if (selectedState) {
+      const matchingIds = new Set(
+        regions.filter(r => r.state === selectedState).map(r => r._id)
+      );
+      filtered = parties.filter(p => matchingIds.has(getRegionId(p)));
+    }
+
     setFilteredParties(filtered);
     setTotalVotes(filtered.reduce((s, p) => s + Number(p.VoteCount || 0), 0));
   };
@@ -134,18 +174,45 @@ const ViewLiveResultPage = () => {
   ];
 
   return (
-    // ✅ No page-level shell — renders cleanly inside Dashboard's content card
-    <div style={{ fontFamily: "'Outfit', sans-serif", color: C.white }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0f2e 0%, #0d1535 50%, #0a1a10 100%)", fontFamily: "'Outfit', sans-serif", color: C.white, position: "relative" }}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+        * { box-sizing: border-box; }
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.8} }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         .fade-in { animation: fadeIn 0.55s ease forwards; }
         .table-row:hover { background: rgba(255,255,255,0.03) !important; }
         select option { background: #111936; color: white; }
         select:focus { border-color: rgba(255,153,51,0.5) !important; outline: none; }
         .turnout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(19,136,8,0.45) !important; }
         .close-btn:hover { background: rgba(255,153,51,0.2) !important; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,153,51,0.25); border-radius: 3px; }
       `}</style>
+
+      {/* Background orbs */}
+      <div style={{ position: "fixed", top: "-15%", left: "-10%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,153,51,0.07) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", bottom: "-20%", right: "-10%", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(19,136,8,0.06) 0%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(255,153,51,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,153,51,0.025) 1px, transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none", zIndex: 0 }} />
+
+      {/* Topbar */}
+      <header style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(10,15,46,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,153,51,0.12)", height: 64, display: "flex", alignItems: "center", padding: "0 clamp(16px, 4vw, 40px)", gap: 14 }}>
+        <div style={{ display: "flex", gap: 3 }}>
+          {["#FF9933", "#FFFFFF", "#138808"].map((c, i) => (
+            <div key={i} style={{ width: 4, height: 28, background: c, borderRadius: 2, opacity: 0.9 }} />
+          ))}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 10, color: "#FF9933", letterSpacing: "0.25em", textTransform: "uppercase", fontWeight: 700 }}>Election Commission of India</div>
+          <div style={{ fontSize: 16, fontWeight: 800, letterSpacing: "-0.01em" }}>Live Election Results</div>
+        </div>
+        <button onClick={() => window.close()} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "8px 16px", color: "#8892B0", fontSize: 13, cursor: "pointer", fontFamily: "'Outfit', sans-serif", whiteSpace: "nowrap" }}>✕ Close</button>
+      </header>
+
+      {/* Page content — pushed below topbar, centered with side padding */}
+      <main style={{ position: "relative", zIndex: 1, paddingTop: 80, paddingBottom: 60, paddingLeft: "clamp(16px, 5vw, 80px)", paddingRight: "clamp(16px, 5vw, 80px)" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
       {/* Stat Cards */}
       <div style={styles.statsRow} className="fade-in">
@@ -192,7 +259,7 @@ const ViewLiveResultPage = () => {
       </div>
 
       {/* Alert */}
-      {activeRegionFilterId && filteredParties.length === 0 && !loading && (
+      {(selectedState || selectedDistrict || selectedTaluk || selectedWard) && filteredParties.length === 0 && !loading && (
         <div style={styles.alert}><span>ℹ️</span> No votes have been recorded in this ward yet.</div>
       )}
 
@@ -282,6 +349,8 @@ const ViewLiveResultPage = () => {
           </div>
         </div>
       )}
+        </div>
+      </main>
     </div>
   );
 };
